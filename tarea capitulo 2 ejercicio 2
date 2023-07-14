@@ -1,0 +1,42 @@
+from machine import Pin
+import time
+
+print("Esperando pulsador...")
+
+sw = Pin(23, Pin.IN)
+led = Pin(2, Pin.OUT)
+
+contador = 0
+tiempo_inicio = 0
+tiempo_final = 0
+duracion = 0
+pulsacion_corta = False
+
+while True:
+    if sw.value():
+        if not pulsacion_corta:
+            tiempo_inicio = time.ticks_ms()  # Guardar tiempo de inicio de pulsación
+            pulsacion_corta = True
+            tiempo_final = 0  # Reiniciar el tiempo de final
+    else:
+        if pulsacion_corta:
+            tiempo_final = time.ticks_ms()  # Guardar tiempo de final de pulsación
+            duracion = tiempo_final - tiempo_inicio
+            pulsacion_corta = False
+            
+            if 200 <= duracion <= 400:
+                print("Pulsación corta detectada")
+                led.value(not led.value())  # Cambiar el estado del LED
+                contador += 1
+                print("Contador:", contador)
+                
+                if contador == 10:
+                    led.value(not led.value())  # Cambiar el estado del LED
+                    contador = 0  # Reiniciar el contador
+                    print("Estado del LED cambiado")
+            
+            elif duracion >= 600:
+                print("Pulsación larga detectada")
+                # Realizar acciones adicionales para pulsación larga si se requiere
+    
+    time.sleep_ms(200)
